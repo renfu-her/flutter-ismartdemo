@@ -28,6 +28,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
   List<Coupon> availableCoupons = [];
   Coupon? selectedCoupon;
   double discountedAmount = 0.0;
+  double discountAmount = 0.0;
 
   @override
   void initState() {
@@ -125,18 +126,20 @@ class _ShopCartPageState extends State<ShopCartPage> {
     setState(() {
       if (selectedCoupon != null) {
         if (selectedCoupon!.type == 'F') {
-          // 固定金额折價
-          discountedAmount = ((totalAmount - _selectedShippingCost) -
-                  double.parse(selectedCoupon!.discount)) +
-              _selectedShippingCost;
+          // 固定金额折价
+          discountAmount = double.parse(selectedCoupon!.discount);
+          discountedAmount = totalAmount - discountAmount;
         } else if (selectedCoupon!.type == 'P') {
-          // 百分比折價
+          // 百分比折价
           double discountPercentage =
               double.parse(selectedCoupon!.discount) / 100;
-          discountedAmount = ((totalAmount - _selectedShippingCost) *
-                  (1 - discountPercentage)) +
-              _selectedShippingCost;
+          discountAmount =
+              (totalAmount - _selectedShippingCost) * discountPercentage;
+          discountedAmount = totalAmount - discountAmount;
         }
+      } else {
+        discountAmount = 0.0;
+        discountedAmount = totalAmount;
       }
     });
   }
@@ -619,7 +622,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
       appBar: AppBar(
         title: const Text('購物車'),
         backgroundColor: Colors.white,
-        foregroundColor: Color(0xFF4F4E4C),
+        foregroundColor: const Color(0xFF4F4E4C),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -666,11 +669,10 @@ class _ShopCartPageState extends State<ShopCartPage> {
                       ),
                     ),
                     const Divider(
-                      color: Colors.grey, // 您可以選擇線的顏色
-                      thickness: 0.5, // 線的厚度
-                      height: 20, // 與其他元素的間距
+                      color: Colors.grey,
+                      thickness: 0.5,
+                      height: 20,
                     ),
-                    // 添加折價券按钮
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: ElevatedButton(
@@ -678,12 +680,30 @@ class _ShopCartPageState extends State<ShopCartPage> {
                         child: Text('選擇折價券'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: Color(0xFF4F4E4C),
-                          side: BorderSide(color: Color(0xFF4F4E4C)),
+                          foregroundColor: const Color(0xFF4F4E4C),
+                          side: const BorderSide(color: Color(0xFF4F4E4C)),
                         ),
                       ),
                     ),
-                    // 显示折價后金额
+                    if (selectedCoupon != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ResponsiveText(
+                              '已選折價券：${selectedCoupon!.name}',
+                              baseFontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            ResponsiveText(
+                              'NT\$${discountAmount.toStringAsFixed(0)}',
+                              baseFontSize: 32,
+                              color: Colors.black,
+                            ),
+                          ],
+                        ),
+                      ),
                     if (selectedCoupon != null)
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -719,7 +739,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 10),
-                              isDense: true, // Reduces the dropdown's height
+                              isDense: true,
                             ),
                             isExpanded: true,
                             value: _selectedPaymentMethod,
