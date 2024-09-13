@@ -58,6 +58,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     Category category = categories[index];
+                    print(category);
                     return Container(
                       color: Colors.white, // 设置每个ExpansionTile的背景颜色为白色
                       child: ExpansionTile(
@@ -66,20 +67,25 @@ class _CategoryPageState extends State<CategoryPage> {
                           width: 56,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white, // 背景颜色为白色
+                            color: Colors.white,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.grey.withOpacity(0.3), // 边框颜色为红色
-                              width: 2, // 边框宽度为3
+                              color: Colors.grey.withOpacity(0.3),
+                              width: 2,
                             ),
                           ),
                           child: ClipOval(
-                            child: Image.network(
-                              category.image,
-                              width: 60.0,
-                              height: 60.0,
-                              fit: BoxFit.cover,
-                            ),
+                            child: category.image.isNotEmpty
+                                ? Image.network(
+                                    category.image,
+                                    width: 60.0,
+                                    height: 60.0,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(color: Colors.white);
+                                    },
+                                  )
+                                : Container(color: Colors.white),
                           ),
                         ),
                         title: InkWell(
@@ -103,27 +109,33 @@ class _CategoryPageState extends State<CategoryPage> {
                           return Padding(
                             padding: const EdgeInsets.only(left: 40.0),
                             child: Container(
-                              color: Colors.white, // 设置子项的背景颜色为白色
+                              color: Colors.white,
                               child: ListTile(
                                 leading: Container(
                                   width: 56,
                                   height: 60,
                                   decoration: BoxDecoration(
-                                    color: Colors.white, // 背景颜色为白色
+                                    color: Colors.white,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.grey
-                                          .withOpacity(0.3), // 边框颜色为红色
-                                      width: 2, // 边框宽度为3
+                                      color: Colors.grey.withOpacity(0.3),
+                                      width: 2,
                                     ),
                                   ),
                                   child: ClipOval(
-                                    child: Image.network(
-                                      childCategory.image,
-                                      width: 60.0,
-                                      height: 60.0,
-                                      fit: BoxFit.cover,
-                                    ),
+                                    child: childCategory.image.isNotEmpty
+                                        ? Image.network(
+                                            childCategory.image,
+                                            width: 60.0,
+                                            height: 60.0,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                  color: Colors.white);
+                                            },
+                                          )
+                                        : Container(color: Colors.white),
                                   ),
                                 ),
                                 title: ResponsiveText(

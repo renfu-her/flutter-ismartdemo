@@ -735,14 +735,11 @@ class _ShopCartPageState extends State<ShopCartPage> {
                       ],
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: products.length + 2, // 添加1是为了显示地址信息
+                      child: ListView(
                         padding: const EdgeInsets.only(bottom: 100.0),
-                        itemBuilder: (context, index) {
-                          if (index == 0 && customerAddress != null) {
-                            // print{customerAddress);
-                            // 在列表的最上方显示地址信息
-                            return FutureBuilder<Map<String, dynamic>?>(
+                        children: [
+                          if (customerAddress != null)
+                            FutureBuilder<Map<String, dynamic>?>(
                               future: fetchCountryAndZoneDetails(
                                   customerAddress!['country_id']),
                               builder: (BuildContext context,
@@ -767,82 +764,61 @@ class _ShopCartPageState extends State<ShopCartPage> {
                                     trailing: IconButton(
                                       icon: const Icon(Icons.edit),
                                       onPressed: () async {
-                                        // 編輯地址的邏輯
-
                                         await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   AddressCartAddPage()),
                                         );
-                                        // print('地址: $selectedAddress');
-                                        // if (selectedAddress != null) {
-                                        //   // 更新地址信息
-                                        //   setState(() {
-                                        //     fetchCustomerAddress(
-                                        //         defaultAddressId:
-                                        //             selectedAddress.id);
-                                        //   });
-                                        // }
                                       },
                                     ),
                                   );
                                 } else {
-                                  return const Text('No data');
+                                  return const Text('正在加載地址信息...');
                                 }
                               },
-                            );
-                          } else if (index == products.length + 1) {
-                            // 显示物流信息
-                            return FutureBuilder<List<ShippingMethod>>(
-                              future: fetchShippingMethods(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                      child: CircularProgressIndicator());
-                                } else if (snapshot.hasData) {
-                                  // 使用上面的 buildShippingMethodList 方法构建界面
-                                  return buildShippingMethodList(
-                                      snapshot.data!);
-                                } else {
-                                  return const Text(
-                                      'No shipping methods available');
-                                }
-                              },
-                            );
-                          } else {
-                            // 显示商品列表
-                            final product = products[index - 1]; // 调整索引以获取正确的商品
-                            return ListTile(
-                              leading: Image.network(
-                                '${imgUrl}' + product.thumbUrl,
-                                width: 80,
-                              ),
-                              title: ResponsiveText(
-                                product.name,
-                                baseFontSize: 36,
-                                maxLines: 4,
-                              ),
-                              subtitle: Row(
-                                children: [
-                                  ResponsiveText('數量: ${product.quantity}',
-                                      baseFontSize: 28),
-                                ],
-                              ),
-                              trailing: ResponsiveText(
-                                  product.special != false
-                                      ? 'NT\$' +
-                                          (product.special * product.quantity)
-                                              .toString()
-                                      : 'NT\$' +
-                                          (product.price * product.quantity)
-                                              .toString(),
-                                  baseFontSize: 28,
-                                  fontWeight: FontWeight.bold),
-                            );
-                          }
-                        },
+                            ),
+                          ...products
+                              .map((product) => ListTile(
+                                    leading: Image.network(
+                                      '${imgUrl}' + product.thumbUrl,
+                                      width: 80,
+                                    ),
+                                    title: ResponsiveText(
+                                      product.name,
+                                      baseFontSize: 36,
+                                      maxLines: 4,
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        ResponsiveText(
+                                            '數量: ${product.quantity}',
+                                            baseFontSize: 28),
+                                      ],
+                                    ),
+                                    trailing: ResponsiveText(
+                                        product.special != false
+                                            ? 'NT\$${(product.special * product.quantity).toStringAsFixed(0)}'
+                                            : 'NT\$${(product.price * product.quantity).toStringAsFixed(0)}',
+                                        baseFontSize: 28,
+                                        fontWeight: FontWeight.bold),
+                                  ))
+                              .toList(),
+                          FutureBuilder<List<ShippingMethod>>(
+                            future: fetchShippingMethods(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                    child: CircularProgressIndicator());
+                              } else if (snapshot.hasData) {
+                                return buildShippingMethodList(snapshot.data!);
+                              } else {
+                                return const Text('暫無可用的物流方式');
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
