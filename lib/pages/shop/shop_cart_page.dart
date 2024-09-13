@@ -850,6 +850,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
                   ? ElevatedButton(
                       onPressed: () {
                         // 当购物车为空时，跳转到逛逛賣場
+                        selectedIndex = 0;
                         Navigator.of(context).push(
                             MaterialPageRoute(builder: (context) => MyApp()));
                       },
