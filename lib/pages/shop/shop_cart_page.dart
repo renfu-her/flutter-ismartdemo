@@ -467,10 +467,14 @@ class _ShopCartPageState extends State<ShopCartPage> {
     // 计算折價金额
     double couponDiscount = 0.0;
 
-    if (selectedCoupon!.type == 'F') {
-      couponDiscount = double.parse(selectedCoupon!.discount);
-    } else if (selectedCoupon!.type == 'P') {
-      couponDiscount = (double.parse(selectedCoupon!.discount) / 100);
+    // 如果 selectedCoupon 不存在，跳過計算折價金額
+    if (selectedCoupon != null) {
+      if (selectedCoupon!.type == 'F') {
+        couponDiscount = double.parse(selectedCoupon!.discount);
+      } else if (selectedCoupon!.type == 'P') {
+        couponDiscount = (totalAmount - couponDiscount) *
+            (double.parse(selectedCoupon!.discount) / 100);
+      }
     }
 
     // 構建請求體數據
