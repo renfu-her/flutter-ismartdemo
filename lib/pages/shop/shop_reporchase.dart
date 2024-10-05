@@ -26,7 +26,7 @@ class _ShopRepurchasePageState extends State<ShopRepurchasePage> {
     if (response.statusCode == 200) {
       return OrderDetail.fromJson(response.data);
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('加载产品失败');
     }
   }
 
@@ -52,11 +52,6 @@ class _ShopRepurchasePageState extends State<ShopRepurchasePage> {
             final order = snapshot.data!.order;
             final products = snapshot.data!.products;
             final totals = snapshot.data!.totals;
-
-            double totalPrice = 0;
-            for (var product in products) {
-              totalPrice += product.price * product.quantity;
-            }
 
             return ListView(
               padding: const EdgeInsets.all(16.0),
@@ -99,14 +94,14 @@ class _ShopRepurchasePageState extends State<ShopRepurchasePage> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (product.options.isNotEmpty)
+                            if (product.option.isNotEmpty)
                               Text(
-                                  '規格: ${product.options.map((option) => "${option['name']}: ${option['value']}").join(', ')}'),
+                                  '规格: ${product.option.map((option) => "${option['name']}: ${option['value']}").join(', ')}'),
                             Text('x ${product.quantity}'),
                           ],
                         ),
                         trailing: Text(
-                          '\$${(product.price * product.quantity).toStringAsFixed(2)}',
+                          product.total,
                           style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -194,9 +189,10 @@ class Product {
   final String href;
   final String image;
   final String productId;
-  final int price;
-  final int quantity;
-  final List<Map<String, String>> options;
+  final String price;
+  final String quantity;
+  final List<Map<String, String>> option;
+  final String total;
 
   Product({
     required this.name,
@@ -206,7 +202,8 @@ class Product {
     required this.productId,
     required this.price,
     required this.quantity,
-    required this.options,
+    required this.option,
+    required this.total,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -216,28 +213,21 @@ class Product {
     final uri = Uri.parse(href);
     final productId = uri.queryParameters['product_id'] ?? '';
 
-    String priceString = json['price'] as String? ?? '';
-    priceString = priceString.replaceAll('\$', '').replaceAll(',', '');
-    int price = int.tryParse(priceString) ?? 0;
-
-    int quantity = int.tryParse(json['quantity'] as String? ?? '') ?? 0;
-
-    List<Map<String, String>> options = (json['option'] as List<dynamic>)
-        .map((option) => {
-              'name': option['name'] as String,
-              'value': option['value'] as String,
-            })
-        .toList();
-
     return Product(
       name: json['name'] as String? ?? '',
       model: json['model'] as String? ?? '',
       href: href,
       image: json['image'] as String? ?? '',
       productId: productId,
-      price: price,
-      quantity: quantity,
-      options: options,
+      price: json['price'] as String? ?? '',
+      quantity: json['quantity'] as String? ?? '',
+      option: (json['option'] as List<dynamic>)
+          .map((option) => {
+                'name': option['name'] as String,
+                'value': option['value'] as String,
+              })
+          .toList(),
+      total: json['total'] as String? ?? '',
     );
   }
 }
