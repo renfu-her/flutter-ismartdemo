@@ -530,31 +530,48 @@ class _ShopCartPageState extends State<ShopCartPage> {
     if (response.statusCode == 200) {
       final responseData = response.data['data'];
 
-      // print(
-      // 'Order submitted successfully: ${responseData['order']['order_id']}');
-
-      //TODO: 跳轉到付款頁面
       final htmlUrl =
           '${demoUrl}/api/product/payment?customerId=${customerId}&orderId=' +
               responseData['order']['order_id'] +
               '&api_key=${apiKey}';
 
-      // print(_selectedPaymentMethod);
+      // 显示等待执行的画面
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 20),
+                Text('正在處理您的訂單，請稍候...'),
+              ],
+            ),
+          );
+        },
+      );
 
-      if (_selectedPaymentMethod == 'bank_transfer') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  ShopPaymentBankTransferPage(htmlUrl: htmlUrl)),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ShopPaymentPage(htmlUrl: htmlUrl)),
-        );
-      }
+      // 延迟2秒后跳转到付款页面
+      Future.delayed(Duration(seconds: 3), () {
+        Navigator.of(context).pop(); // 关闭等待对话框
+
+        if (_selectedPaymentMethod == 'bank_transfer') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ShopPaymentBankTransferPage(htmlUrl: htmlUrl)),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ShopPaymentPage(htmlUrl: htmlUrl)),
+          );
+        }
+      });
     } else {
       print('Failed to submit order: ${response.statusCode}');
     }
@@ -660,7 +677,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ResponsiveText(
-                            '商品總計',
+                            '商品+運費總計',
                             baseFontSize: 34,
                             fontWeight: FontWeight.bold,
                           ),
