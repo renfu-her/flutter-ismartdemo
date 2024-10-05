@@ -660,7 +660,7 @@ class _ShopCartPageState extends State<ShopCartPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ResponsiveText(
-                            '商品總計',
+                            '商品+運費總計',
                             baseFontSize: 34,
                             fontWeight: FontWeight.bold,
                           ),
