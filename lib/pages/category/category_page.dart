@@ -196,7 +196,7 @@ class Category {
                   Category.fromJson(childJson as Map<String, dynamic>))
               .toList()
           : [],
-      column: json['column'] as String? ?? '',
+      column: json['column']?.toString() ?? '', // 将column转换为字符串
       href: json['href'] as String? ?? '',
       image: json['image'] as String? ?? '',
       categoryId: json['category_id'] as String? ?? '',
