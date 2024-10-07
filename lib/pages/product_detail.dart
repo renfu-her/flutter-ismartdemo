@@ -93,19 +93,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             productOptions.map((json) => ProductOption.fromJson(json)).toList();
 
         // 将 description_json 转换为 HTML
-        var descriptionHtml =
-            descriptionJsonToHtml(product['description_json']);
-        product['description_html'] = descriptionHtml;
+
+        var descriptionJson = product['description_json'];
+        if (descriptionJson != null) {
+          var descriptionHtml = descriptionJsonToHtml(descriptionJson);
+          product['description_html'] = descriptionHtml;
+        } else {
+          product['description_html'] = '';
+        }
 
         return {
           'details': product,
           'options': productOptionsParsed,
         };
       } else {
-        throw Exception('Failed to load product detail');
+        throw Exception('讀取內容錯誤');
       }
     } catch (e) {
-      throw Exception('Failed to load product detail');
+      throw Exception('讀取內容錯誤');
     }
   }
 
